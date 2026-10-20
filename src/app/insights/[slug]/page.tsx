@@ -63,7 +63,7 @@ export default async function ArticlePage({ params }: PageProps<"/insights/[slug
   };
 
   return (
-    <article className="pb-24 pt-36 sm:pt-44">
+    <article className="pb-24 pt-24 sm:pt-28">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Container className="max-w-3xl">
         <Link href="/insights/" className="text-sm font-medium text-plum-700 hover:text-plum-900">
