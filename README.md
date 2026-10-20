@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Beyond the Podium with Dr. Prachi
 
-## Getting Started
+Personal-brand website for **Dr. Prachi Behrani Manocha (PhD)** — Certified Soft Skills Trainer, Communication Skills & Public Speaking Coach.
 
-First, run the development server:
+**Stack:** Next.js 16 (App Router, static export) · React 19 · TypeScript · Tailwind CSS v4 · AWS S3 + CloudFront · GitHub Actions (OIDC)
+
+## Features
+
+- Home (hero, about, programs, approach, insights, contact), `/insights` listing and statically generated article pages
+- Fully responsive, scroll-reveal animations (respects `prefers-reduced-motion`, works without JS)
+- Program enquiry + general contact forms: validation, honeypot spam trap, loading/success/error states — **UI only**
+- SEO: metadata, Open Graph, canonical URLs, JSON-LD (Person, ProfessionalService, Article), `sitemap.xml`, `robots.txt`
+- Accessibility: semantic landmarks, skip link, labelled fields, `aria-invalid`/live regions, keyboard-friendly menu & tabs
+- Zero runtime dependencies beyond Next/React; ships as plain static files
+
+## Quick start
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # optional
+npm run dev                  # http://localhost:3000
+npm run build                # static site -> out/
+npm run preview              # serve out/ at http://localhost:4173
+npm run lint && npm run typecheck
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Requires Node 20.9+.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Editing content
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| What | Where |
+|---|---|
+| Name, contact details, socials, hero, about, programs, approach, testimonials | `src/content/site.ts` |
+| Insights articles | `src/content/insights.ts` |
+| Colours & fonts | `src/app/globals.css` (`@theme`) and `src/app/layout.tsx` |
+| Photos | `public/images/` |
 
-## Learn More
+- Items marked **`EDIT`** are draft copy — review before going live.
+- Empty contact fields (email, WhatsApp, phone, location) are hidden automatically; the floating WhatsApp button appears once `whatsapp` is set.
+- The testimonials section stays hidden until you add **real** testimonials.
+- **Image slots** (search for `IMAGE SLOT`) currently show brand illustrations; replace with `next/image` photos when ready.
 
-To learn more about Next.js, take a look at the following resources:
+## Connecting the forms (Google Apps Script)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+All forms call one function: **`submitForm()` in `src/lib/forms.ts`** — the single integration point. It documents the payload shape and includes a commented `fetch` example.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Deploy your Apps Script as a Web App, copy the `/exec` URL.
+2. Set `NEXT_PUBLIC_FORM_ENDPOINT` in `.env.local` and in the GitHub `FORM_ENDPOINT` variable.
+3. Replace the TODO block in `submitForm()`.
 
-## Deploy on Vercel
+Until then: in `npm run dev` submissions are logged to the console and show the success state; in production the form shows a friendly "being set up" notice.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+See **[docs/DEPLOY-AWS.md](docs/DEPLOY-AWS.md)** (S3 + CloudFront + GitHub Actions).
+The `out/` folder also deploys as-is to Netlify, Vercel, Cloudflare Pages or GitHub Pages.
+
+## Project structure
+
+```
+src/
+  app/                 layout, home, insights/, insights/[slug]/, sitemap, robots, 404, icon
+  components/          Header, Footer, Reveal, ArtPanel, InsightCard, ui primitives, icons
+    sections/          Hero, About, Programs, Approach, Testimonials, InsightsPreview, Contact
+    forms/             LeadForms (enquiry + contact), Field components
+  content/             site.ts, insights.ts  ← all editable copy
+  lib/forms.ts         ← form integration point
+infra/                 CloudFront Function + IAM policy templates
+.github/workflows/     deploy.yml (CI/CD to AWS)
+```

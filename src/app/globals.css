@@ -1,26 +1,102 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* Laptop-width screens with limited height: tighten spacing so each section fits one view. */
+@custom-variant short (@media (min-width: 1024px) and (max-height: 700px));
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* Brand tokens — palette drawn from Dr. Prachi's headshot (plum blazer, gold accents). */
+@theme {
+  --color-ivory: #fbf7f2;
+  --color-cream: #f3ebe1;
+  --color-sand: #e7dccd;
+  --color-plum-50: #f6f0f6;
+  --color-plum-100: #ebdfed;
+  --color-plum-300: #b79cc4;
+  --color-plum-500: #7c5a92;
+  --color-plum-700: #4f2d57;
+  --color-plum-900: #2c1730;
+  --color-gold-300: #e2c58f;
+  --color-gold-500: #b8893b;
+  --color-gold-700: #8a6424;
+  --color-ink: #261c28;
+  --color-muted: #6b5d6d;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-manrope), system-ui, sans-serif;
+
+  --animate-marquee: marquee 38s linear infinite;
+  --animate-float: float 6s ease-in-out infinite;
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 4.5rem; /* fixed header height */
 }
+
+/* Anchor targets: cancel each section's top padding (py-24 / sm:py-32) so its content,
+   not the padding, lands just below the fixed header. On laptops the gap grows to roughly
+   centre the content in the remaining viewport height. */
+main section[id]:not(#top) {
+  --anchor-gap: 1.5rem;
+  scroll-margin-top: calc(var(--anchor-gap) - 6rem);
+}
+@media (min-width: 40rem) {
+  main section[id]:not(#top) { scroll-margin-top: calc(var(--anchor-gap) - 8rem); }
+}
+@media (min-width: 64rem) {
+  main section[id]:not(#top) { --anchor-gap: clamp(0.25rem, (100svh - 4.5rem - 38rem) / 2, 3rem); }
+}
+@media (min-width: 80rem) {
+  main section[id]:not(#top) { --anchor-gap: clamp(0.25rem, (100svh - 4.5rem - 34rem) / 2, 3rem); }
+}
+
+body {
+  background: var(--color-ivory);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-plum-100);
+  color: var(--color-plum-900);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-gold-500);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Scroll-reveal (see components/Reveal.tsx) — only hidden when JS is running */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.js .reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .js .reveal { opacity: 1; transform: none; transition: none; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+}
+
+/* Article typography */
+.prose-article p { margin: 0 0 1.25rem; line-height: 1.85; color: var(--color-ink); }
+.prose-article h2 { font-family: var(--font-display); font-size: 1.6rem; line-height: 1.25; margin: 2.5rem 0 1rem; color: var(--color-plum-900); }
+.prose-article ul { margin: 0 0 1.5rem; padding-left: 1.25rem; list-style: disc; }
+.prose-article li { margin: 0.4rem 0; line-height: 1.7; }
+.prose-article li::marker { color: var(--color-gold-500); }
